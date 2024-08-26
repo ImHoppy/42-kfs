@@ -16,6 +16,7 @@ $(IMG): $(OBJ)
 	ld -m elf_i386 -T link.ld -o kernel $(OBJ)
 
 all: $(IMG)
+	./grub.sh
 
 %.o: %.asm
 	nasm -f elf32 $< -o $@
