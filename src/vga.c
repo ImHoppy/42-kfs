@@ -1,4 +1,5 @@
 #include "vga.h"
+#include "io.h"
 
 void vga_clear_screen()
 {
@@ -43,4 +44,14 @@ uint16_t vga_display(char *message, uint16_t line, uint16_t column)
 	};
 
 	return (msg_index);
+}
+
+void vga_set_cursor(uint8_t row, uint8_t col)
+{
+	uint16_t pos = row * VGA_WIDTH + col;
+
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t)(pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
 }

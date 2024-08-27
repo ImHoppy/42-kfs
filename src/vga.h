@@ -6,6 +6,8 @@
 #include <stdint.h>
 
 #define VGA_MEMORY 0xb8000
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
 
 enum vga_color
 {
@@ -31,5 +33,8 @@ enum vga_color
 
 void vga_clear_screen();
 uint16_t vga_display(char *message, uint16_t line, uint16_t column);
+
+// Cursor
+void vga_set_cursor(uint8_t row, uint8_t col);
 
 #endif
