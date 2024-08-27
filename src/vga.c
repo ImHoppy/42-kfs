@@ -50,8 +50,9 @@ void vga_set_cursor(uint8_t row, uint8_t col)
 {
 	uint16_t pos = row * VGA_WIDTH + col;
 
-	outb(0x3D4, 0x0F);
-	outb(0x3D5, (uint8_t)(pos & 0xFF));
-	outb(0x3D4, 0x0E);
-	outb(0x3D5, (uint8_t)((pos >> 8) & 0xFF));
+	outb(VGA_INDEX_REG, 0x0F);
+	outb(VGA_DATA_REG, (uint8_t)(pos & 0xFF));
+
+	outb(VGA_INDEX_REG, 0x0E);
+	outb(VGA_DATA_REG, (uint8_t)((pos >> 8) & 0xFF));
 }

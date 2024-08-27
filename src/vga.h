@@ -34,6 +34,9 @@ enum vga_color
 void vga_clear_screen();
 uint16_t vga_display(char *message, uint16_t line, uint16_t column);
 
+#define VGA_INDEX_REG 0x3D4
+#define VGA_DATA_REG 0x3D5
+
 // Cursor
 void vga_set_cursor(uint8_t row, uint8_t col);
 
