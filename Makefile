@@ -1,4 +1,5 @@
 IMG = kernel
+GRUB_IMG = kernel.iso
 
 ASM_SRC = src/boot.asm \
 src/syscall.asm
@@ -12,11 +13,13 @@ OBJ = $(ASM_SRC:.asm=.o) $(C_SRC:.c=.o)
 
 .PHONY: all clean fclean re emu
 
-$(IMG): $(OBJ)
-	ld -m elf_i386 -T link.ld -o kernel $(OBJ)
+all: $(IMG) $(GRUB_IMG)
 
-all: $(IMG)
+$(GRUB_IMG): $(IMG)
 	./grub.sh
+
+$(IMG): $(OBJ)
+	ld -m elf_i386 -T link.ld -o $(IMG) $(OBJ)
 
 %.o: %.asm
 	nasm -f elf32 $< -o $@
@@ -26,11 +29,12 @@ all: $(IMG)
 
 clean:
 	rm -f $(OBJ)
+	rm -rf isodir
 
 fclean: clean
-	rm -f kernel
+	rm -f $(IMG) $(GRUB_IMG)
 
 re: fclean all
 
 emu:
-	qemu-system-i386 -kernel kernel
+	qemu-system-i386 -cdrom $(GRUB_IMG)
