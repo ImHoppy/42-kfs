@@ -19,14 +19,15 @@ uint16_t vga_display(char *message, uint16_t line, uint16_t column)
 	uint16_t i = 0;
 	uint16_t msg_index = 0;
 
-	i = (line * 80 * 2);
+	i = (line * 80 * 2) + (column * 2);
 
 	while (message[msg_index] != 0)
 	{
 		if (message[msg_index] == '\n')
 		{
 			line++;
-			i = (line * 80 * 2);
+			column = 0;
+			i = (line * 80 * 2) + (column * 2);
 			msg_index++;
 		}
 		else
