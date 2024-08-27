@@ -6,7 +6,8 @@ ASM_SRC = src/boot.asm \
 src/syscall.asm
 
 C_SRC = src/kernel.c \
-src/vga.c
+src/vga.c \
+src/libft/ft_itoa.c  src/libft/ft_strlen.c  src/libft/ft_strrev.c
 
 C_FLAGS = -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs # -fno-rtti
 
