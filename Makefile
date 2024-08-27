@@ -1,5 +1,6 @@
 IMG = kernel
 GRUB_IMG = kernel.iso
+DISK = disk.img
 
 ASM_SRC = src/boot.asm \
 src/syscall.asm
@@ -13,7 +14,7 @@ OBJ = $(ASM_SRC:.asm=.o) $(C_SRC:.c=.o)
 
 .PHONY: all clean fclean re emu
 
-all: $(IMG) $(GRUB_IMG)
+all: $(IMG) $(GRUB_IMG) $(DISK)
 
 $(GRUB_IMG): $(IMG)
 	@if [ -z "$$(docker images -q grub-build 2> /dev/null)" ]; then \
@@ -27,6 +28,9 @@ $(GRUB_IMG): $(IMG)
 $(IMG): $(OBJ)
 	ld -m elf_i386 -T link.ld -o $(IMG) $(OBJ)
 
+$(DISK):
+	dd if=/dev/zero of=$(DISK) bs=1M count=10
+
 %.o: %.asm
 	nasm -f elf32 $< -o $@
 
@@ -38,9 +42,9 @@ clean:
 	rm -rf isodir
 
 fclean: clean
-	rm -f $(IMG) $(GRUB_IMG)
+	rm -f $(IMG) $(GRUB_IMG) $(DISK)
 
 re: fclean all
 
 emu:
-	qemu-system-i386 -cdrom $(GRUB_IMG)
+	qemu-system-i386 -cdrom $(GRUB_IMG) -drive file=$(DISK),format=raw
