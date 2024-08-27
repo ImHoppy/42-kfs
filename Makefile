@@ -16,7 +16,13 @@ OBJ = $(ASM_SRC:.asm=.o) $(C_SRC:.c=.o)
 all: $(IMG) $(GRUB_IMG)
 
 $(GRUB_IMG): $(IMG)
-	./grub.sh
+	@if [ -z "$$(docker images -q grub-build 2> /dev/null)" ]; then \
+		echo "Building Docker image grub-build..."; \
+		docker build . --tag grub-build; \
+	else \
+		echo "Docker image grub-build already exists."; \
+	fi
+	docker run  -v .:/app grub-build ./grub.sh
 
 $(IMG): $(OBJ)
 	ld -m elf_i386 -T link.ld -o $(IMG) $(OBJ)
