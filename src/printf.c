@@ -15,6 +15,15 @@ uint16_t printf(const char format[], ...)
 			format++;
 			switch (*format)
 			{
+			case 'c':
+			{
+				char c = va_arg(args, int);
+				char str[2];
+				str[0] = c;
+				str[1] = 0;
+				column += vga_display(str, 0, column);
+				break;
+			}
 			case 's':
 			{
 				char *str = va_arg(args, char *);
