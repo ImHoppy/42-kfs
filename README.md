@@ -1,7 +1,6 @@
 # KFS - Kernel From Scratch
 
-The **KFS** project is focused on writing a 32-bit kernel from scratch, with the final objective of creating a Unix-like system.
-The project is broken down into several stages, each adding a critical component to the kernel.
+The **KFS** project is focused on writing a 32-bit kernel from scratch, built without using libc, and booted with QEMU. The final objective is to create a Unix-like system. The project is broken down into several stages, each adding a critical component to the kernel.
 
 ## Project Stages
 
