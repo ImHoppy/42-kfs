@@ -16,6 +16,11 @@ void vga_clear_screen()
 
 uint16_t vga_display(char *message, uint16_t line, uint16_t column)
 {
+	return vga_display_color(message, line, column, VGA_COLOR(VGA_COLOR_WHITE, VGA_COLOR_BLACK));
+}
+
+uint16_t vga_display_color(char *message, uint16_t line, uint16_t column, uint8_t color)
+{
 	char *vidmem = (char *)VGA_MEMORY;
 	uint16_t i = 0;
 	uint16_t msg_index = 0;
@@ -38,7 +43,7 @@ uint16_t vga_display(char *message, uint16_t line, uint16_t column)
 			msg_index++;
 			i++;
 			// Set color
-			vidmem[i] = VGA_COLOR(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+			vidmem[i] = color;
 			i++;
 		};
 	};
