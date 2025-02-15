@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-uint16_t printf(const char *format, ...);
+uint16_t printf(uint8_t line, const char *format, ...);
 
 #endif

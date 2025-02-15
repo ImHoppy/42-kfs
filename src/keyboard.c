@@ -1,15 +1,6 @@
 #include "keyboard.h"
 #include "io.h"
 
-#define SHIFT_L 0x2A
-#define SHIFT_R 0x36
-#define CTRL 0x1D
-#define ALT 0x38
-#define CAPS 0x3A
-
-#define PRESSED_MASK 0
-#define RELEASED_MASK 0x80
-
 static bool shift = false;
 static bool caps = false;
 static bool control = false;
