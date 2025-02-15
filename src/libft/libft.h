@@ -25,5 +25,8 @@ int ft_isalnum(int c);
 /// mem
 void *ft_memcpy(void *dst, const void *src, unsigned int n);
 void *ft_memset(void *b, int c, unsigned int len);
+void *ft_memmove(void *dst, const void *src, unsigned int len);
+int ft_memcmp(const void *s1, const void *s2, unsigned int n);
+void *ft_memchr(const void *s, int c, unsigned int n);
 
 #endif

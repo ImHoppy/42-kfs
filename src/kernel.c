@@ -11,37 +11,51 @@
 #define PROMPT "~bprompt>~s "
 #define PROMPT_LEN 8
 
-uint8_t screen[SCREEN_HEIGHT + 1][VGA_WIDTH] = {0};
-uint8_t scroll = 0;
-uint8_t last_line = 0;
+#define MAX_LINE 64
+
+typedef struct
+{
+	uint8_t data[SCREEN_HEIGHT + 1][VGA_WIDTH];
+	uint8_t last_line;
+	char line[MAX_LINE + 1];
+	uint8_t cursor_x;
+	uint8_t len;
+	uint8_t scroll;
+} screen_t;
+
+#define MAX_SCREEN 3
+screen_t screens[MAX_SCREEN] = {0};
+uint8_t current_screen = 0;
 
 void draw_screen()
 {
-	int last_displayed = last_line - scroll;
+	screen_t *screen = &screens[current_screen];
+	int last_displayed = screen->last_line - screen->scroll;
+
 	for (uint8_t i = VGA_HEIGHT - 2; i > 0; i--)
 	{
 		vga_clear_line(i);
 		char *to_draw = NULL;
-		for (int j = last_displayed; j >= 0; j--)
+		for (int j = last_displayed - 1; j >= 0; j--)
 		{
-			if (screen[j][0] != 0)
+			if (screen->data[j][0] != 0)
 			{
-				to_draw = screen[j];
-				last_displayed = j - 1;
+				to_draw = screen->data[j];
+				last_displayed = j;
 				break;
 			}
 		}
 		if (to_draw)
 			printf(i, "%s ", to_draw);
-		printf(0, "%d ", scroll);
+		printf(0, "Screen n*~g%d~s, Scroll: ~r%d   ", current_screen, screen->scroll);
 	}
 }
 
 void reset_prompt()
 {
 	vga_clear_line(VGA_HEIGHT - 1);
-	printf(VGA_HEIGHT - 1, PROMPT);
-	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN);
+	printf(VGA_HEIGHT - 1, PROMPT "%s ", screens[current_screen].line);
+	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screens[current_screen].cursor_x);
 }
 
 /* Entry point */
@@ -52,61 +66,88 @@ void kmain()
 	uint8_t last_key = 0;
 	uint8_t key = 0;
 
-	uint8_t cursor_x = 0;
-	char line[64] = {0};
-	uint8_t len = 0;
-
 	printf(0, "42\n");
 	reset_prompt();
 	while (42)
 	{
 		key = keyboard_read();
 		uint8_t scancode = intb(KEYBOARD_DATA_PORT);
+		screen_t *screen = &screens[current_screen];
+
 		if (scancode & RELEASED_MASK)
 		{
 			last_key = 0;
 		}
 		else if (key > 0 && key != last_key)
 		{
-			if (len < (64 - 1) && ft_isprint(key))
+			if (screen->len < MAX_LINE && ft_isprint(key))
 			{
-				line[len] = key;
-				len++;
-				printf(VGA_HEIGHT - 1, PROMPT "%s", line);
-				cursor_x++;
-				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + cursor_x);
+				if (screen->cursor_x < screen->len)
+				{
+					ft_memmove(screen->line + screen->cursor_x + 1, screen->line + screen->cursor_x, screen->len - screen->cursor_x);
+					screen->line[screen->cursor_x] = key;
+				}
+				else
+				{
+					screen->line[screen->len] = key;
+				}
+				screen->len++;
+				screen->cursor_x++;
+				reset_prompt();
 			}
 			switch (key)
 			{
 			case 128: // UP
-				scroll++;
+				screen->scroll++;
 				draw_screen();
 				break;
 			case 131: // DOWN
-				scroll--;
+				screen->scroll--;
 				draw_screen();
 				break;
 			case 129: // left
-				if (cursor_x > 0)
-					cursor_x--;
-				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + cursor_x);
+				if (screen->cursor_x > 0)
+					screen->cursor_x--;
+				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screen->cursor_x);
 				break;
 			case 130: // right
-				if (cursor_x < len)
-					cursor_x++;
-				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + cursor_x);
+				if (screen->cursor_x < screen->len)
+					screen->cursor_x++;
+				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screen->cursor_x);
 				break;
 			case '\n':
-				if (len > 0)
+				if (screen->len > 0)
 				{
-					ft_memcpy(screen[last_line], line, len);
-					last_line++;
-					ft_memset(line, 0, len);
-					cursor_x = 0;
-					len = 0;
+					ft_memcpy(screen->data[screen->last_line], screen->line, screen->len);
+					ft_memset(screen->line, 0, screen->len);
+					screen->cursor_x = 0;
+					screen->len = 0;
+					screen->scroll = 0;
+					screen->last_line++;
 					draw_screen();
 					reset_prompt();
 				}
+				break;
+			case '\b':
+				if (screen->cursor_x <= 0)
+					break;
+				screen->cursor_x--;
+				ft_memmove(screen->line + screen->cursor_x, screen->line + screen->cursor_x + 1, screen->len - screen->cursor_x);
+				screen->len--;
+				reset_prompt();
+				break;
+			case 132:
+				current_screen = (current_screen + 1) % MAX_SCREEN;
+				draw_screen();
+				reset_prompt();
+				break;
+			case 133:
+				if (current_screen == 0)
+					current_screen = MAX_SCREEN - 1;
+				else
+					current_screen--;
+				draw_screen();
+				reset_prompt();
 				break;
 			default:
 				break;

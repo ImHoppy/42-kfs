@@ -25,6 +25,9 @@ uint16_t printf(uint8_t line, const char format[], ...)
 			case 'b':
 				colors = VGA_COLOR(VGA_COLOR_LIGHT_BLUE, VGA_COLOR_BLACK);
 				break;
+			case 'g':
+				colors = VGA_COLOR(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
+				break;
 			}
 		}
 		else if (*format == '%')
