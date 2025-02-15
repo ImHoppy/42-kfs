@@ -8,6 +8,8 @@
 #include "keyboard.h"
 
 #define SCREEN_HEIGHT VGA_HEIGHT * 2
+#define PROMPT "~bprompt>~s "
+#define PROMPT_LEN 8
 
 uint8_t screen[SCREEN_HEIGHT + 1][VGA_WIDTH] = {0};
 uint8_t scroll = 0;
@@ -35,6 +37,13 @@ void draw_screen()
 	}
 }
 
+void reset_prompt()
+{
+	vga_clear_line(VGA_HEIGHT - 1);
+	printf(VGA_HEIGHT - 1, PROMPT);
+	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN);
+}
+
 /* Entry point */
 void kmain()
 {
@@ -48,6 +57,7 @@ void kmain()
 	uint8_t len = 0;
 
 	printf(0, "42\n");
+	reset_prompt();
 	while (42)
 	{
 		key = keyboard_read();
@@ -62,30 +72,46 @@ void kmain()
 			{
 				line[len] = key;
 				len++;
-				printf(VGA_HEIGHT - 1, "~bprompt> ~s%s", line);
+				printf(VGA_HEIGHT - 1, PROMPT "%s", line);
 				cursor_x++;
-				vga_set_cursor(VGA_HEIGHT - 1, 8 + cursor_x);
+				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + cursor_x);
 			}
-			else if (key == 128) // UP
+			switch (key)
 			{
+			case 128: // UP
 				scroll++;
 				draw_screen();
-			}
-			else if (key == 131) // DOWN
-			{
+				break;
+			case 131: // DOWN
 				scroll--;
 				draw_screen();
+				break;
+			case 129: // left
+				if (cursor_x > 0)
+					cursor_x--;
+				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + cursor_x);
+				break;
+			case 130: // right
+				if (cursor_x < len)
+					cursor_x++;
+				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + cursor_x);
+				break;
+			case '\n':
+				if (len > 0)
+				{
+					ft_memcpy(screen[last_line], line, len);
+					last_line++;
+					ft_memset(line, 0, len);
+					cursor_x = 0;
+					len = 0;
+					draw_screen();
+					reset_prompt();
+				}
+				break;
+			default:
+				break;
 			}
 			last_key = key;
-		}
-		else if (key == '\n' && len > 0)
-		{
-			ft_memcpy(screen[last_line], line, len);
-			last_line++;
-			ft_memset(line, 0, len);
-			cursor_x = 0;
-			len = 0;
-			draw_screen();
 		}
 	}
 }
