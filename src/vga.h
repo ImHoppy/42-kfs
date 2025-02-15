@@ -32,6 +32,7 @@ enum vga_color
 #define VGA_COLOR(fg, bg) fg | bg << 4
 
 void vga_clear_screen();
+void vga_clear_line(uint8_t line);
 uint16_t vga_display(char *message, uint16_t line, uint16_t column);
 uint16_t vga_display_color(char *message, uint16_t line, uint16_t column, uint8_t color);
 

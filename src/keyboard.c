@@ -28,15 +28,15 @@ static const uint8_t scancode_table[] = {
 	0, /* 69 - Num lock*/
 	0, /* Scroll Lock */
 	0, /* Home key */
-	0, /* Up Arrow */
+	128, /* Up Arrow */
 	0, /* Page Up */
 	'-',
-	0, /* Left Arrow */
+	129, /* Left Arrow */
 	0,
-	0, /* Right Arrow */
+	130, /* Right Arrow */
 	'+',
 	0, /* 79 - End key*/
-	0, /* Down Arrow */
+	131, /* Down Arrow */
 	0, /* Page Down */
 	0, /* Insert Key */
 	0, /* Delete Key */
@@ -67,15 +67,15 @@ static const uint8_t scancode_table_shift[] = {
 	0, /* 69 - Num lock*/
 	0, /* Scroll Lock */
 	0, /* Home key */
-	0, /* Up Arrow */
+	128, /* Up Arrow */
 	0, /* Page Up */
 	'-',
-	0, /* Left Arrow */
+	129, /* Left Arrow */
 	0,
-	0, /* Right Arrow */
+	130, /* Right Arrow */
 	'+',
 	0, /* 79 - End key*/
-	0, /* Down Arrow */
+	131, /* Down Arrow */
 	0, /* Page Down */
 	0, /* Insert Key */
 	0, /* Delete Key */

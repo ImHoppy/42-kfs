@@ -7,6 +7,34 @@
 #include "libft/libft.h"
 #include "keyboard.h"
 
+#define SCREEN_HEIGHT VGA_HEIGHT * 2
+
+uint8_t screen[SCREEN_HEIGHT + 1][VGA_WIDTH] = {0};
+uint8_t scroll = 0;
+uint8_t last_line = 0;
+
+void draw_screen()
+{
+	int last_displayed = last_line - scroll;
+	for (uint8_t i = VGA_HEIGHT - 2; i > 0; i--)
+	{
+		vga_clear_line(i);
+		char *to_draw = NULL;
+		for (int j = last_displayed; j >= 0; j--)
+		{
+			if (screen[j][0] != 0)
+			{
+				to_draw = screen[j];
+				last_displayed = j - 1;
+				break;
+			}
+		}
+		if (to_draw)
+			printf(i, "%s ", to_draw);
+		printf(0, "%d ", scroll);
+	}
+}
+
 /* Entry point */
 void kmain()
 {
@@ -28,14 +56,36 @@ void kmain()
 		{
 			last_key = 0;
 		}
-		else if (key > 0 && key != last_key && len < (64 - 1) && ft_isprint(key))
+		else if (key > 0 && key != last_key)
 		{
-			line[len] = key;
-			len++;
-			printf(VGA_HEIGHT - 1, "~bprompt> ~s%s", line);
-			cursor_x++;
-			vga_set_cursor(VGA_HEIGHT - 1, 8 + cursor_x);
+			if (len < (64 - 1) && ft_isprint(key))
+			{
+				line[len] = key;
+				len++;
+				printf(VGA_HEIGHT - 1, "~bprompt> ~s%s", line);
+				cursor_x++;
+				vga_set_cursor(VGA_HEIGHT - 1, 8 + cursor_x);
+			}
+			else if (key == 128) // UP
+			{
+				scroll++;
+				draw_screen();
+			}
+			else if (key == 131) // DOWN
+			{
+				scroll--;
+				draw_screen();
+			}
 			last_key = key;
+		}
+		else if (key == '\n' && len > 0)
+		{
+			ft_memcpy(screen[last_line], line, len);
+			last_line++;
+			ft_memset(line, 0, len);
+			cursor_x = 0;
+			len = 0;
+			draw_screen();
 		}
 	}
 }

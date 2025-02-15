@@ -2,6 +2,7 @@
 #define LIBFT
 
 #include <stdint.h>
+#include <stddef.h>
 
 int ft_itoa(int num, unsigned char *str, int len, int base);
 
@@ -20,5 +21,9 @@ int ft_isdigit(int c);
 int ft_isascii(int c);
 int ft_isalpha(int c);
 int ft_isalnum(int c);
+
+/// mem
+void *ft_memcpy(void *dst, const void *src, unsigned int n);
+void *ft_memset(void *b, int c, unsigned int len);
 
 #endif

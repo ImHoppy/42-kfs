@@ -14,6 +14,19 @@ void vga_clear_screen()
 	};
 };
 
+void vga_clear_line(uint8_t line)
+{
+	char *vidmem = (char *)VGA_MEMORY;
+	uint16_t i = 0;
+	while (i < (VGA_WIDTH * 2))
+	{
+		vidmem[(line * 80 * 2) + i] = ' ';
+		i++;
+		vidmem[(line * 80 * 2) + i] = VGA_COLOR(VGA_COLOR_WHITE, VGA_COLOR_BLACK);
+		i++;
+	};
+};
+
 uint16_t vga_display(char *message, uint16_t line, uint16_t column)
 {
 	return vga_display_color(message, line, column, VGA_COLOR(VGA_COLOR_WHITE, VGA_COLOR_BLACK));
