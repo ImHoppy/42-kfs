@@ -51,4 +51,4 @@ fclean: clean
 re: fclean all
 
 emu:
-	qemu-system-i386 -cdrom $(GRUB_IMG) -drive file=$(DISK),format=raw
+	qemu-system-i386 -cdrom $(GRUB_IMG) -drive file=$(DISK),format=raw -serial mon:stdio
