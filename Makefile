@@ -3,9 +3,12 @@ GRUB_IMG = kernel.iso
 DISK = disk.img
 
 ASM_SRC = src/boot.asm \
+src/gdt/load_gdt.asm \
 src/syscall.asm
 
-C_SRC = src/kernel.c \
+C_SRC = src/gdt/init_gdt.c \
+src/uart/uart.c \
+src/kernel.c \
 src/vga.c \
 src/printf.c \
 src/keyboard.c \

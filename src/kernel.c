@@ -6,6 +6,7 @@
 #include "kernel.h"
 #include "libft/libft.h"
 #include "keyboard.h"
+#include "gdt/gdt.h"
 
 #define SCREEN_HEIGHT VGA_HEIGHT * 2
 #define PROMPT "~bprompt>~s "
@@ -61,6 +62,7 @@ void reset_prompt()
 /* Entry point */
 void kmain()
 {
+	init_gdt();
 	vga_clear_screen();
 
 	uint8_t last_key = 0;

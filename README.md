@@ -16,5 +16,5 @@ The **KFS** project is focused on writing a 32-bit kernel from scratch, built wi
 - [ ] **KFS-X:** Final stage – create a complete Linux-like environment. Optionally, name your kernel.
 
 ## References
-# VGA Register
+### vga register
 http://www.osdever.net/FreeVGA/vga/crtcreg.htm#0E
