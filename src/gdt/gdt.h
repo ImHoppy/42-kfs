@@ -22,7 +22,7 @@ __attribute__((packed)) struct gdt_ptr {
     uint32_t addr;
 };
 
-extern void load_gdt(struct gdt_ptr*);
+extern void load_gdt(uint32_t* gdt_ptr);
 void init_gdt(void);
 
 #endif

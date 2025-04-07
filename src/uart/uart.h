@@ -9,5 +9,6 @@
 
 void serial_putc(char c);
 void serial_puts(const char *s);
+void serial_puthex(uint8_t n);
 
 #endif

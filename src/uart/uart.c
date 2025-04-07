@@ -9,6 +9,17 @@ void serial_putc(char c)
 	outb(UART0, c);
 }
 
+void serial_puthex(uint8_t n)
+{
+	while (!(intb(UART0 + 5) & 0x20))
+		; // Wait until ready
+	
+	char c = n >> 4;
+	outb(UART0, c < 10 ? c + '0' : c - 10 + 'A');
+	c = n & 0x0F;
+	outb(UART0, c < 10 ? c + '0' : c - 10 + 'A');	
+}
+
 // Write a string to serial port
 void serial_puts(const char *s)
 {
