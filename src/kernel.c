@@ -16,7 +16,7 @@
 
 typedef struct
 {
-	uint8_t data[SCREEN_HEIGHT + 1][VGA_WIDTH];
+	char data[SCREEN_HEIGHT + 1][VGA_WIDTH];
 	uint8_t last_line;
 	char line[MAX_LINE + 1];
 	uint8_t cursor_x;

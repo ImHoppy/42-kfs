@@ -1,6 +1,6 @@
 #include "libft.h"
 
-int ft_itoa(int num, unsigned char *str, int len, int base)
+int ft_itoa(unsigned int num, char *str, int len, int base)
 {
 	int sum = num;
 	int i = 0;
