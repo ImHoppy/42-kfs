@@ -10,6 +10,7 @@ int ft_itoa(unsigned int num, char *str, int len, int base);
 
 uint32_t ft_strlen(char const *s);
 void ft_strrev(char *str);
+int	ft_strcmp(const char *s1, const char *s2);
 
 /// char
 int ft_islower(int c);
@@ -21,6 +22,8 @@ int ft_isdigit(int c);
 int ft_isascii(int c);
 int ft_isalpha(int c);
 int ft_isalnum(int c);
+
+int	ft_atoi(const char *str);
 
 /// mem
 void *ft_memcpy(void *dst, const void *src, unsigned int n);
