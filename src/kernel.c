@@ -9,7 +9,7 @@
 #include "uart/uart.h"
 #include "gdt/gdt.h"
 
-#define SCREEN_HEIGHT VGA_HEIGHT * 2
+#define SCREEN_HEIGHT 254
 #define PROMPT "~bprompt>~s "
 #define PROMPT_LEN 8
 
@@ -65,12 +65,13 @@ void reset_prompt()
 
 void add_line_to_history(char *line, uint32_t len) {
 	screen_t *screen = &screens[current_screen];
-	ft_memcpy(screen->data[screen->last_line], line, len);
-	ft_memset(line, 0, len);
+	ft_memset(screen->data[screen->last_line], 0, VGA_WIDTH);
+	ft_memcpy(screen->data[screen->last_line], line, MIN(len, VGA_WIDTH));
+	ft_memset(line, 0, MIN(len, VGA_WIDTH));
 	screen->cursor_x = 0;
 	screen->len = 0;
 	screen->scroll = 0;
-	screen->last_line++;
+	screen->last_line = (screen->last_line + 1) % (SCREEN_HEIGHT);
 	draw_screen();
 }
 
