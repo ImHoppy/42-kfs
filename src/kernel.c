@@ -14,6 +14,8 @@
 
 #define MAX_LINE 64
 
+#define STACK_ADDR = 0x00000000
+
 typedef struct
 {
 	char data[SCREEN_HEIGHT + 1][VGA_WIDTH];
@@ -59,6 +61,156 @@ void reset_prompt()
 	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screens[current_screen].cursor_x);
 }
 
+
+void add_line_to_history(char *line, uint32_t len) {
+	screen_t *screen = &screens[current_screen];
+	ft_memcpy(screen->data[screen->last_line], line, len);
+	ft_memset(line, 0, len);
+	screen->cursor_x = 0;
+	screen->len = 0;
+	screen->scroll = 0;
+	screen->last_line++;
+	draw_screen();
+}
+
+void kdump(int addr, uint32_t size) {
+	uint32_t ptr = (uint32_t)addr;
+	char *str = (char *)ptr;
+	char line [VGA_WIDTH];
+	int line_cursor = 0;
+	uint32_t i = 0;
+	
+	while (i < size ) {
+		ft_itoa(ptr, line, 8, 16);
+		line_cursor = ft_strlen(line);
+		line[line_cursor++] = ':';
+
+		for (uint32_t j = 0; j < 16; ++j)
+		{
+			ft_itoa(str[j], line+line_cursor, 1, 16);
+			line_cursor++;
+			if (j % 4 == 0) {
+				line[line_cursor++] = ' ';
+			}
+		}
+
+		for (uint32_t j = 0; j < 16; ++j)
+		{
+			if (ft_isprint(str[j])) {
+				line[line_cursor++] = str[j];
+			} else {
+				line[line_cursor++] = '.';
+			}
+		}
+		add_line_to_history(line, line_cursor);
+		line_cursor = 0;
+		ft_memset(line, '\0', VGA_WIDTH);
+		ptr += 16;
+		i += 16;
+	}
+	
+}
+
+char  *first_word(char *line)
+{
+	for(uint32_t i = 0; line[i]; ++i) {
+		if (line[i] == ' ') {
+			return line + i + 1;
+		}
+	}
+
+	return NULL;
+}
+
+void prompt_handling(uint8_t *key, uint8_t *last_key) {
+	*key = keyboard_read();
+	uint8_t scancode = intb(KEYBOARD_DATA_PORT);
+	screen_t *screen = &screens[current_screen];
+
+	if (scancode & RELEASED_MASK)
+	{
+		*last_key = 0;
+	}
+	else if (*key > 0 && *key != *last_key)
+	{
+		if (screen->len < MAX_LINE && ft_isprint(*key))
+		{
+			if (screen->cursor_x < screen->len)
+			{
+				ft_memmove(screen->line + screen->cursor_x + 1, screen->line + screen->cursor_x, screen->len - screen->cursor_x);
+				screen->line[screen->cursor_x] = *key;
+			}
+			else
+			{
+				screen->line[screen->len] = *key;
+			}
+			screen->len++;
+			screen->cursor_x++;
+			reset_prompt();
+		}
+		switch (*key)
+		{
+		case 128: // UP
+			screen->scroll++;
+			draw_screen();
+			break;
+		case 131: // DOWN
+			screen->scroll--;
+			draw_screen();
+			break;
+		case 129: // left
+			if (screen->cursor_x > 0)
+				screen->cursor_x--;
+			vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screen->cursor_x);
+			break;
+		case 130: // right
+			if (screen->cursor_x < screen->len)
+				screen->cursor_x++;
+			vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screen->cursor_x);
+			break;
+		case '\n':
+			if (screen->len > 0)
+			{
+				if (ft_strcmp(screen->line, "dump") == 0) {
+					int addr = 0x00000000;
+					char *addr_given = first_word(screen->line);
+					if (addr_given)
+						addr = ft_atoi(addr_given);
+					kdump(addr, 128);
+				}
+				add_line_to_history(screen->line, screen->len);
+				reset_prompt();
+			}
+			break;
+		case '\b':
+			if (screen->cursor_x <= 0)
+				break;
+			screen->cursor_x--;
+			ft_memmove(screen->line + screen->cursor_x, screen->line + screen->cursor_x + 1, screen->len - screen->cursor_x);
+			screen->len--;
+			reset_prompt();
+			break;
+		case 132: // Page up
+			current_screen = (current_screen + 1) % MAX_SCREEN;
+			draw_screen();
+			reset_prompt();
+			break;
+		case 133: // Page down
+			if (current_screen == 0)
+				current_screen = MAX_SCREEN - 1;
+			else
+				current_screen--;
+			draw_screen();
+			reset_prompt();
+			break;
+		default:
+			break;
+		}
+		*last_key = *key;
+	}
+}
+
+
 /* Entry point */
 void kmain()
 {
@@ -70,91 +222,11 @@ void kmain()
 
 	printf(0, "42\n");
 	reset_prompt();
+
+	
+
 	while (42)
 	{
-		key = keyboard_read();
-		uint8_t scancode = intb(KEYBOARD_DATA_PORT);
-		screen_t *screen = &screens[current_screen];
-
-		if (scancode & RELEASED_MASK)
-		{
-			last_key = 0;
-		}
-		else if (key > 0 && key != last_key)
-		{
-			if (screen->len < MAX_LINE && ft_isprint(key))
-			{
-				if (screen->cursor_x < screen->len)
-				{
-					ft_memmove(screen->line + screen->cursor_x + 1, screen->line + screen->cursor_x, screen->len - screen->cursor_x);
-					screen->line[screen->cursor_x] = key;
-				}
-				else
-				{
-					screen->line[screen->len] = key;
-				}
-				screen->len++;
-				screen->cursor_x++;
-				reset_prompt();
-			}
-			switch (key)
-			{
-			case 128: // UP
-				screen->scroll++;
-				draw_screen();
-				break;
-			case 131: // DOWN
-				screen->scroll--;
-				draw_screen();
-				break;
-			case 129: // left
-				if (screen->cursor_x > 0)
-					screen->cursor_x--;
-				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screen->cursor_x);
-				break;
-			case 130: // right
-				if (screen->cursor_x < screen->len)
-					screen->cursor_x++;
-				vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screen->cursor_x);
-				break;
-			case '\n':
-				if (screen->len > 0)
-				{
-					ft_memcpy(screen->data[screen->last_line], screen->line, screen->len);
-					ft_memset(screen->line, 0, screen->len);
-					screen->cursor_x = 0;
-					screen->len = 0;
-					screen->scroll = 0;
-					screen->last_line++;
-					draw_screen();
-					reset_prompt();
-				}
-				break;
-			case '\b':
-				if (screen->cursor_x <= 0)
-					break;
-				screen->cursor_x--;
-				ft_memmove(screen->line + screen->cursor_x, screen->line + screen->cursor_x + 1, screen->len - screen->cursor_x);
-				screen->len--;
-				reset_prompt();
-				break;
-			case 132:
-				current_screen = (current_screen + 1) % MAX_SCREEN;
-				draw_screen();
-				reset_prompt();
-				break;
-			case 133:
-				if (current_screen == 0)
-					current_screen = MAX_SCREEN - 1;
-				else
-					current_screen--;
-				draw_screen();
-				reset_prompt();
-				break;
-			default:
-				break;
-			}
-			last_key = key;
-		}
+		prompt_handling(&key, &last_key);
 	}
 }
