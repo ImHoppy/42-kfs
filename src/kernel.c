@@ -6,6 +6,7 @@
 #include "kernel.h"
 #include "libft/libft.h"
 #include "keyboard.h"
+#include "uart/uart.h"
 #include "gdt/gdt.h"
 
 #define SCREEN_HEIGHT VGA_HEIGHT * 2
@@ -75,24 +76,29 @@ void add_line_to_history(char *line, uint32_t len) {
 
 void kdump(int addr, uint32_t size) {
 	uint32_t ptr = (uint32_t)addr;
-	char *str = (char *)ptr;
 	char line [VGA_WIDTH];
 	int line_cursor = 0;
 	uint32_t i = 0;
+	ft_memset(line, '\0', VGA_WIDTH);
 	
-	while (i < size ) {
+	while (i < size) {
+		uint8_t *str = (uint8_t *)ptr;
 		ft_itoa(ptr, line, 8, 16);
 		line_cursor = ft_strlen(line);
 		line[line_cursor++] = ':';
 
 		for (uint32_t j = 0; j < 16; ++j)
 		{
-			ft_itoa(str[j], line+line_cursor, 1, 16);
-			line_cursor++;
-			if (j % 4 == 0) {
+			if (j % 2 == 0) {
 				line[line_cursor++] = ' ';
 			}
+			char c = str[j] >> 4;
+			line[line_cursor++] = c < 10 ? c + '0' : c - 10 + 'A';
+			c = str[j] & 0x0F;
+			line[line_cursor++] = c < 10 ? c + '0' : c - 10 + 'A';
 		}
+		
+		line[line_cursor++] = ' ';
 
 		for (uint32_t j = 0; j < 16; ++j)
 		{
@@ -171,7 +177,7 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 		case '\n':
 			if (screen->len > 0)
 			{
-				if (ft_strcmp(screen->line, "dump") == 0) {
+				if (ft_strncmp(screen->line, "dump", 4) == 0) {
 					int addr = 0x00000000;
 					char *addr_given = first_word(screen->line);
 					if (addr_given)
@@ -223,7 +229,7 @@ void kmain()
 	printf(0, "42\n");
 	reset_prompt();
 
-	
+	ft_memcpy((void*)0x0800, "Hello World", 11);
 
 	while (42)
 	{

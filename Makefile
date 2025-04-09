@@ -13,7 +13,7 @@ src/vga.c \
 src/printf.c \
 src/keyboard.c \
 src/libft/ft_itoa.c src/libft/ft_atoi.c  src/libft/ft_char.c \
-src/libft/ft_strlen.c  src/libft/ft_strrev.c src/libft/str/ft_strcmp.c \
+src/libft/ft_strlen.c  src/libft/ft_strrev.c src/libft/str/ft_strcmp.c src/libft/str/ft_strncmp.c \
 src/libft/mem/ft_memchr.c  src/libft/mem/ft_memcmp.c  src/libft/mem/ft_memcpy.c  src/libft/mem/ft_memmove.c  src/libft/mem/ft_memset.c
 
 C_FLAGS = -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs -Wall -Werror -Wextra # -fno-rtti
@@ -43,7 +43,7 @@ $(DISK):
 	@nasm -f elf32 $< -o $@
 
 %.o: %.c
-	@gcc $(C_FLAGS) -m32 -c $< -o $@
+	@gcc $(C_FLAGS) -m32 -c $< -o $@ -g3
 
 clean:
 	@rm -f $(OBJ)
@@ -55,4 +55,4 @@ fclean: clean
 re: fclean all
 
 emu:
-	@qemu-system-i386 -cdrom $(GRUB_IMG) -drive file=$(DISK),format=raw -serial mon:stdio
+	@qemu-system-i386 -s -cdrom $(GRUB_IMG) -drive file=$(DISK),format=raw -serial mon:stdio

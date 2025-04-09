@@ -11,6 +11,7 @@ int ft_itoa(unsigned int num, char *str, int len, int base);
 uint32_t ft_strlen(char const *s);
 void ft_strrev(char *str);
 int	ft_strcmp(const char *s1, const char *s2);
+int	ft_strncmp(const char *s1, const char *s2, size_t n);
 
 /// char
 int ft_islower(int c);
