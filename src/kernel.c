@@ -179,14 +179,21 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 			if (screen->len > 0)
 			{
 				if (ft_strncmp(screen->line, "dump", 4) == 0) {
-					int addr = 0x00000000;
+					int addr = 0x00000800;
 					char *addr_given = first_word(screen->line);
 					if (addr_given)
 						addr = ft_atoi(addr_given);
-					kdump(addr, 128);
+					else {
+						asm volatile ("mov %%esp, %0" : "=r"(addr));
 				}
 				add_line_to_history(screen->line, screen->len);
 				reset_prompt();
+					kdump(addr, 1024);
+				}
+				else {
+					add_line_to_history(screen->line, screen->len);
+					reset_prompt();
+				}
 			}
 			break;
 		case '\b':
