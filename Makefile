@@ -11,7 +11,7 @@ src/printf.c \
 src/keyboard.c \
 src/libft/ft_itoa.c  src/libft/ft_strlen.c  src/libft/ft_strrev.c src/libft/ft_char.c \
 src/libft/mem/ft_memchr.c  src/libft/mem/ft_memcmp.c  src/libft/mem/ft_memcpy.c  src/libft/mem/ft_memmove.c  src/libft/mem/ft_memset.c \
-src/libft/str/ft_strncmp.c
+src/libft/str/ft_strncmp.c src/libft/str/ft_strcmp.c
 C_FLAGS = -fno-builtin -fno-exceptions -fno-stack-protector -nostdlib -nodefaultlibs # -fno-rtti
 
 OBJ = $(ASM_SRC:.asm=.o) $(C_SRC:.c=.o)
