@@ -32,6 +32,8 @@ static inline void cpuid(uint32_t code, uint32_t *a, uint32_t *b, uint32_t *c, u
 	asm volatile("cpuid" : "=a"(*a), "=b"(*b), "=c"(*c), "=d"(*d) : "a"(code));
 }
 
+void add_line_to_history(char *line, uint32_t len);
+
 void display_cpu_info()
 {
 	char line[VGA_WIDTH];
@@ -60,7 +62,7 @@ void draw_screen()
 	for (uint8_t i = VGA_HEIGHT - 2; i > 0; i--)
 	{
 		vga_clear_line(i);
-		char *to_draw = NULL;
+		uint8_t *to_draw = NULL;
 		for (int j = last_displayed - 1; j >= 0; j--)
 		{
 			if (screen->data[j][0] != 0)
