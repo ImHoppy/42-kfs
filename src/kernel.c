@@ -81,7 +81,7 @@ void kdump(int addr, uint32_t size) {
 	int line_cursor = 0;
 	uint32_t i = 0;
 	ft_memset(line, '\0', VGA_WIDTH);
-	
+
 	while (i < size) {
 		uint8_t *str = (uint8_t *)ptr;
 		ft_itoa(ptr, line, 8, 16);
@@ -98,7 +98,7 @@ void kdump(int addr, uint32_t size) {
 			c = str[j] & 0x0F;
 			line[line_cursor++] = c < 10 ? c + '0' : c - 10 + 'A';
 		}
-		
+
 		line[line_cursor++] = ' ';
 
 		for (uint32_t j = 0; j < 16; ++j)
@@ -115,7 +115,6 @@ void kdump(int addr, uint32_t size) {
 		ptr += 16;
 		i += 16;
 	}
-	
 }
 
 char  *first_word(char *line)
@@ -127,6 +126,16 @@ char  *first_word(char *line)
 	}
 
 	return NULL;
+}
+
+void reboot(void)
+{
+	asm volatile("cli");
+	uint8_t good = 0x02;
+	while (good & 0x02)
+		good = intb(0x64);
+	outb(0x64, 0xFE);
+	asm volatile("hlt");
 }
 
 void prompt_handling(uint8_t *key, uint8_t *last_key) {
@@ -178,19 +187,30 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 		case '\n':
 			if (screen->len > 0)
 			{
-				if (ft_strncmp(screen->line, "dump", 4) == 0) {
+				if (ft_strncmp(screen->line, "dump", 4) == 0)
+				{
 					int addr = 0x00000800;
 					char *addr_given = first_word(screen->line);
 					if (addr_given)
 						addr = ft_atoi(addr_given);
-					else {
-						asm volatile ("mov %%esp, %0" : "=r"(addr));
-				}
-				add_line_to_history(screen->line, screen->len);
-				reset_prompt();
+					else
+					{
+						asm volatile("mov %%esp, %0" : "=r"(addr));
+					}
+					add_line_to_history(screen->line, screen->len);
+					reset_prompt();
 					kdump(addr, 1024);
 				}
-				else {
+				else if (ft_strcmp(screen->line, "reboot") == 0)
+				{
+					reboot();
+				}
+				else if (ft_strcmp(screen->line, "stop") == 0)
+				{
+					outw(0x604, 0x2000);
+				}
+				else
+				{
 					add_line_to_history(screen->line, screen->len);
 					reset_prompt();
 				}
