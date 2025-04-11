@@ -27,6 +27,38 @@ typedef struct
 screen_t screens[MAX_SCREEN] = {0};
 uint8_t current_screen = 0;
 
+void reset_prompt()
+{
+	vga_clear_line(VGA_HEIGHT - 1);
+	printf(VGA_HEIGHT - 1, PROMPT "%s ", screens[current_screen].line);
+	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screens[current_screen].cursor_x);
+}
+
+static inline void cpuid(uint32_t code, uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d)
+{
+       asm volatile("cpuid" : "=a"(*a), "=b"(*b), "=c"(*c), "=d"(*d) : "a"(code));
+}
+
+void display_cpu_info()
+{
+	char line [VGA_WIDTH];
+	int line_cursor = 0;
+	ft_memset(line, '\0', VGA_WIDTH);
+
+    uint32_t eax, ebx, ecx, edx;
+    cpuid(0, &eax, &ebx, &ecx, &edx);
+	
+	for(uint8_t i = 0; i <= 24; i += 8){
+		line[line_cursor] = (unsigned char)(ebx >> i);
+		line[line_cursor + 4] = (unsigned char)(edx >> i);
+		line[line_cursor + 8] = (unsigned char)(ecx >> i);
+		line_cursor++;
+	}
+
+	add_line_to_history(line, ft_strlen(line));
+	reset_prompt();
+}
+
 void draw_screen()
 {
 	screen_t *screen = &screens[current_screen];
@@ -49,13 +81,6 @@ void draw_screen()
 			printf(i, "%s ", to_draw);
 		printf(0, "Screen n*~g%d~s, Scroll: ~r%d   ", current_screen, screen->scroll);
 	}
-}
-
-void reset_prompt()
-{
-	vga_clear_line(VGA_HEIGHT - 1);
-	printf(VGA_HEIGHT - 1, PROMPT "%s ", screens[current_screen].line);
-	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screens[current_screen].cursor_x);
 }
 
 
@@ -120,6 +145,9 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 		case '\n':
 			if (screen->len > 0)
 			{
+				if (ft_strncmp(screen->line, "info cpu", 8) == 0) {
+					display_cpu_info();
+				}
 				add_line_to_history(screen->line, screen->len);
 				reset_prompt();
 			}
@@ -153,6 +181,7 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 }
 
 
+
 /* Entry point */
 void kmain()
 {
@@ -162,6 +191,10 @@ void kmain()
 	uint8_t key = 0;
 
 	printf(0, "42\n");
+	reset_prompt();
+	// display_cpu_info();
+
+	// printf("")
 	reset_prompt();
 	while (42)
 	{
