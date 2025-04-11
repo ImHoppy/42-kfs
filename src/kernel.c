@@ -55,21 +55,20 @@ void draw_screen()
 	}
 }
 
-void reset_prompt()
+void draw_prompt()
 {
 	vga_clear_line(VGA_HEIGHT - 1);
 	printf(VGA_HEIGHT - 1, PROMPT "%s ", screens[current_screen].line);
 	vga_set_cursor(VGA_HEIGHT - 1, PROMPT_LEN + screens[current_screen].cursor_x);
 }
 
-
-void add_line_to_history(char *line, uint32_t len) {
+void add_line_to_history(char *line, uint32_t len)
+{
 	screen_t *screen = &screens[current_screen];
 	ft_memset(screen->data[screen->last_line], 0, VGA_WIDTH);
 	ft_memcpy(screen->data[screen->last_line], line, MIN(len, VGA_WIDTH));
 	ft_memset(line, 0, MIN(len, VGA_WIDTH));
 	screen->cursor_x = 0;
-	screen->len = 0;
 	screen->scroll = 0;
 	screen->last_line = (screen->last_line + 1) % (SCREEN_HEIGHT);
 	draw_screen();
@@ -117,10 +116,12 @@ void kdump(int addr, uint32_t size) {
 	}
 }
 
-char  *first_word(char *line)
+char *first_word(char *line)
 {
-	for(uint32_t i = 0; line[i]; ++i) {
-		if (line[i] == ' ') {
+	for (uint32_t i = 0; line[i]; ++i)
+	{
+		if (line[i] == ' ')
+		{
 			return line + i + 1;
 		}
 	}
@@ -162,7 +163,7 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 			}
 			screen->len++;
 			screen->cursor_x++;
-			reset_prompt();
+			draw_prompt();
 		}
 		switch (*key)
 		{
@@ -187,32 +188,31 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 		case '\n':
 			if (screen->len > 0)
 			{
-				if (ft_strncmp(screen->line, "dump", 4) == 0)
+				char line_cpy[MAX_LINE + 1] = {0};
+				ft_memcpy(line_cpy, screen->line, MAX_LINE);
+				add_line_to_history(screen->line, screen->len);
+				screen->len = 0;
+				draw_prompt();
+				if (ft_strncmp(line_cpy, "dump", 4) == 0)
 				{
 					int addr = 0x00000800;
-					char *addr_given = first_word(screen->line);
+					char *addr_given = first_word(line_cpy);
 					if (addr_given)
 						addr = ft_atoi(addr_given);
 					else
 					{
 						asm volatile("mov %%esp, %0" : "=r"(addr));
 					}
-					add_line_to_history(screen->line, screen->len);
-					reset_prompt();
-					kdump(addr, 1024);
+
+					kdump(addr, 256);
 				}
-				else if (ft_strcmp(screen->line, "reboot") == 0)
+				else if (ft_strcmp(line_cpy, "reboot") == 0)
 				{
 					reboot();
 				}
-				else if (ft_strcmp(screen->line, "stop") == 0)
+				else if (ft_strcmp(line_cpy, "stop") == 0)
 				{
 					outw(0x604, 0x2000);
-				}
-				else
-				{
-					add_line_to_history(screen->line, screen->len);
-					reset_prompt();
 				}
 			}
 			break;
@@ -222,12 +222,12 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 			screen->cursor_x--;
 			ft_memmove(screen->line + screen->cursor_x, screen->line + screen->cursor_x + 1, screen->len - screen->cursor_x);
 			screen->len--;
-			reset_prompt();
+			draw_prompt();
 			break;
 		case 132: // Page up
 			current_screen = (current_screen + 1) % MAX_SCREEN;
 			draw_screen();
-			reset_prompt();
+			draw_prompt();
 			break;
 		case 133: // Page down
 			if (current_screen == 0)
@@ -235,7 +235,7 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 			else
 				current_screen--;
 			draw_screen();
-			reset_prompt();
+			draw_prompt();
 			break;
 		default:
 			break;
@@ -243,7 +243,6 @@ void prompt_handling(uint8_t *key, uint8_t *last_key) {
 		*last_key = *key;
 	}
 }
-
 
 /* Entry point */
 void kmain()
@@ -255,9 +254,9 @@ void kmain()
 	uint8_t key = 0;
 
 	printf(0, "42\n");
-	reset_prompt();
+	draw_prompt();
 
-	ft_memcpy((void*)0x0800, "Hello World", 11);
+	ft_memcpy((void *)0x0800, "Hello World", 11);
 
 	while (42)
 	{
