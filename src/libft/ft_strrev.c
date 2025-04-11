@@ -1,6 +1,6 @@
 #include "libft.h"
 
-void ft_strrev(unsigned char *str)
+void ft_strrev(char *str)
 {
 	int i;
 	int j;

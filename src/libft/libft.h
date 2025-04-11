@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <stddef.h>
 
-int ft_itoa(int num, unsigned char *str, int len, int base);
+int ft_itoa(int num, char *str, int len, int base);
 
 /// string
 uint32_t ft_strlen(char const *s);
-void ft_strrev(unsigned char *str);
+void ft_strrev(char *str);
 int	ft_strncmp(const char *s1, const char *s2, size_t n);
 int ft_strcmp(const char *s1, const char *s2);
 
