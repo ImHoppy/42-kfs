@@ -129,17 +129,20 @@ char *first_word(char *line)
 	return NULL;
 }
 
+#define KEYBOARD_PORT 0x64
+#define KEYBOARD_RESET 0xFE
 void reboot(void)
 {
 	asm volatile("cli");
 	uint8_t good = 0x02;
-	while (good & 0x02)
-		good = intb(0x64);
-	outb(0x64, 0xFE);
+	while (good & 0x02) // Wait keyboard ready to write
+		good = intb(KEYBOARD_PORT);
+	outb(KEYBOARD_PORT, KEYBOARD_RESET);
 	asm volatile("hlt");
 }
 
-void prompt_handling(uint8_t *key, uint8_t *last_key) {
+void prompt_handling(uint8_t *key, uint8_t *last_key)
+{
 	*key = keyboard_read();
 	uint8_t scancode = intb(KEYBOARD_DATA_PORT);
 	screen_t *screen = &screens[current_screen];
