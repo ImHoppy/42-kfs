@@ -31,6 +31,33 @@ typedef struct
 screen_t screens[MAX_SCREEN] = {0};
 uint8_t current_screen = 0;
 
+static inline void cpuid(uint32_t code, uint32_t *a, uint32_t *b, uint32_t *c, uint32_t *d)
+{
+	asm volatile("cpuid" : "=a"(*a), "=b"(*b), "=c"(*c), "=d"(*d) : "a"(code));
+}
+
+void add_line_to_history(char *line, uint32_t len);
+
+void display_cpu_info()
+{
+	char line[VGA_WIDTH];
+	int line_cursor = 0;
+	ft_memset(line, '\0', VGA_WIDTH);
+
+	uint32_t eax, ebx, ecx, edx;
+	cpuid(0, &eax, &ebx, &ecx, &edx);
+
+	for (uint8_t i = 0; i <= 24; i += 8)
+	{
+		line[line_cursor] = (unsigned char)(ebx >> i);
+		line[line_cursor + 4] = (unsigned char)(edx >> i);
+		line[line_cursor + 8] = (unsigned char)(ecx >> i);
+		line_cursor++;
+	}
+
+	add_line_to_history(line, ft_strlen(line));
+}
+
 void draw_screen()
 {
 	screen_t *screen = &screens[current_screen];
@@ -216,6 +243,10 @@ void prompt_handling(uint8_t *key, uint8_t *last_key)
 				else if (ft_strcmp(line_cpy, "stop") == 0)
 				{
 					outw(0x604, 0x2000);
+				}
+				else if (ft_strcmp(line_cpy, "info cpu") == 0)
+				{
+					display_cpu_info();
 				}
 			}
 			break;
