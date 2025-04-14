@@ -12,6 +12,7 @@ uint32_t ft_strlen(char const *s);
 void ft_strrev(char *str);
 int	ft_strcmp(const char *s1, const char *s2);
 int	ft_strncmp(const char *s1, const char *s2, size_t n);
+int ft_hextoint(const char *str);
 
 /// char
 int ft_islower(int c);

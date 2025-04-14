@@ -228,7 +228,12 @@ void prompt_handling(uint8_t *key, uint8_t *last_key)
 					int addr = 0x00000800;
 					char *addr_given = first_word(line_cpy);
 					if (addr_given)
-						addr = ft_atoi(addr_given);
+					{
+						if (addr_given[0] == '0' && addr_given[1] == 'x')
+							addr = ft_hextoint(addr_given + 2);
+						else
+							addr = ft_atoi(addr_given);
+					}
 					else
 					{
 						asm volatile("mov %%esp, %0" : "=r"(addr));
